@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Confirm Purchase</title>
+  <style>
+    :root{--bg:#0f172a;--card:#111827;--text:#e5e7eb;--accent:#22d3ee;--accent-2:#38bdf8}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:radial-gradient(1200px 1200px at 10% 10%, #1f2937 0%, #0b1022 60%, #050814 100%);color:var(--text);min-height:100dvh;display:grid;place-items:center}
+    .card{width:min(760px,92vw);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(6px);border-radius:20px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+    h1{margin:0 0 8px;font-size:clamp(1.5rem,2.5vw+1rem,2.4rem);letter-spacing:.3px}
+    p{margin:0 0 18px;opacity:.9}
+    .btn{cursor:pointer;display:inline-flex;align-items:center;gap:10px;border:0;border-radius:14px;padding:14px 18px;font-weight:700;font-size:1.05rem;color:#06131a;background:linear-gradient(180deg,var(--accent),var(--accent-2));box-shadow:0 12px 30px rgba(56,189,248,.35);transition:transform .08s ease, filter .2s ease}
+    .btn:hover{filter:brightness(1.05)}
+    .btn:active{transform:translateY(1px)}
+    .fineprint{font-size:.9rem;opacity:.75}
+    .center{display:grid;place-items:center;text-align:center;gap:14px}
+    .hidden{display:none}
+    .spinner{width:28px;height:28px;border-radius:999px;border:3px solid rgba(255,255,255,.25);border-top-color:var(--accent);animation:spin .9s linear infinite;margin:4px auto}
+    @keyframes spin{to{transform:rotate(1turn)}}
+    video{aspect-ratio:16/9;width:100%;border:0;border-radius:16px;background:#000}
+  </style>
+</head>
+<body>
+  <main class="card" id="app">
+    <!-- View 1: Confirm -->
+    <section class="center" id="confirm">
+      <h1>Ready to confirm your purchase?</h1>
+      <p class="fineprint">Click the button below to proceed.</p>
+      <button class="btn" id="confirmBtn" aria-label="Click to confirm purchase">🛒 Click to confirm purchase</button>
+    </section>
+
+    <!-- View 2: Processing -->
+    <section class="center hidden" id="processing" aria-live="polite" aria-busy="true">
+      <p>Processing your order…</p>
+      <div class="spinner" role="status" aria-label="Loading"></div>
+    </section>
+
+    <!-- View 3: Video (plays in-page, no redirect) -->
+    <section class="hidden" id="videoWrap">
+      <h1 class="center">Purchase Confirmed 🎉</h1>
+      <div class="center">
+        <div id="playerContainer" style="width:100%"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function(){
+      const btn = document.getElementById('confirmBtn');
+      const confirmView = document.getElementById('confirm');
+      const processingView = document.getElementById('processing');
+      const videoWrap = document.getElementById('videoWrap');
+      const playerContainer = document.getElementById('playerContainer');
+
+      function injectYouTube(){
+        // Create an iframe only when needed (single-file, no extra assets in repo)
+        const iframe = document.createElement('iframe');
+        iframe.title = 'Never Gonna Give You Up';
+        iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
+        iframe.allowFullscreen = true;
+        iframe.style.width = '100%';
+        iframe.style.aspectRatio = '16/9';
+        iframe.style.border = '0';
+        // Try to start with audio using the same user click gesture
+        const src = 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?enablejsapi=1&autoplay=1&rel=0&modestbranding=1&playsinline=1';
+        iframe.src = src;
+        playerContainer.innerHTML = '';
+        playerContainer.appendChild(iframe);
+      }
+
+      function revealVideo(){
+        processingView.classList.add('hidden');
+        videoWrap.classList.remove('hidden');
+        injectYouTube();
+      }
+
+      function handleClick(ev){
+        if (ev) ev.preventDefault();
+        confirmView.classList.add('hidden');
+        processingView.classList.remove('hidden');
+        setTimeout(revealVideo, 300);
+      }
+
+      if (btn) btn.addEventListener('click', handleClick);
+      document.addEventListener('DOMContentLoaded', () => {
+        if (btn && !btn.__wired){ btn.addEventListener('click', handleClick); btn.__wired = true; }
+      });
+    })();
+  </script>
+</body>
+</html>
